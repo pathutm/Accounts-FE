@@ -4,54 +4,41 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { 
-  LayoutDashboard, 
-  Users, 
+  Building2, 
   FileText, 
-  List, 
   LogOut, 
   TrendingUp,
   Menu,
-  X
+  X,
+  Package,
+  MessageSquare
 } from "lucide-react";
 
-const sidebarSections = [
-  {
-    title: "Accounts Receivable",
-    items: [
-      { name: "Customer Details", href: "/dashboard/customers", icon: Users },
-      { name: "Invoices", href: "/dashboard/invoices", icon: FileText },
-      { name: "Category Table", href: "/dashboard/categories", icon: List },
-    ]
-  },
-  {
-    title: "Accounts Payable",
-    items: [
-      { name: "Purchase Orders", href: "/dashboard/purchase-orders", icon: FileText },
-    ]
-  }
-];
-
-export default function DashboardLayout({
+export default function VendorPanelLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [org, setOrg] = useState<any>(null);
+  const [user, setUser] = useState<any>(null);
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    const storedOrg = localStorage.getItem("org");
+    const storedUser = localStorage.getItem("user");
     const token = localStorage.getItem("token");
 
-    if (!storedOrg || storedOrg === "undefined" || !token) {
+    if (!storedUser || !token) {
       router.push("/");
     } else {
       try {
-        setOrg(JSON.parse(storedOrg));
+        const parsedUser = JSON.parse(storedUser);
+        if (parsedUser.role !== 'vendor') {
+          router.push("/dashboard");
+        } else {
+          setUser(parsedUser);
+        }
       } catch (e) {
-        console.error("Failed to parse org:", e);
         router.push("/");
       }
     }
@@ -62,7 +49,13 @@ export default function DashboardLayout({
     router.push("/");
   };
 
-  if (!org) return null;
+  if (!user) return null;
+
+  const sidebarItems = [
+    { name: "Received Orders", href: "/vendor-panel", icon: Package },
+    { name: "My Invoices", href: "/vendor-panel/invoices", icon: FileText },
+    { name: "Client Messages", href: "/vendor-panel/messages", icon: MessageSquare },
+  ];
 
   return (
     <div className="min-h-screen bg-background flex font-sans">
@@ -76,42 +69,40 @@ export default function DashboardLayout({
           {isSidebarOpen ? (
             <div className="flex items-center gap-3 overflow-hidden">
               <TrendingUp className="h-6 w-6 text-primary shrink-0" />
-              <span className="font-bold text-lg truncate">{org.name}</span>
+              <span className="font-bold text-lg text-foreground truncate">Vendor Portal</span>
             </div>
           ) : (
             <TrendingUp className="h-6 w-6 text-primary mx-auto" />
           )}
         </div>
 
-        <nav className="flex-1 px-4 space-y-6 overflow-y-auto scrollbar-none">
-          {sidebarSections.map((section) => (
-            <div key={section.title} className="space-y-2">
-              {isSidebarOpen && (
-                <h3 className="px-3 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">
-                  {section.title}
-                </h3>
-              )}
-              <div className="space-y-1">
-                {section.items.map((item) => {
-                  const isActive = pathname === item.href;
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className={`flex items-center gap-3 p-3 rounded-lg transition-all group ${
-                        isActive 
-                          ? "bg-primary text-white shadow-lg shadow-primary/20 scale-[1.02]" 
-                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                      }`}
-                    >
-                      <item.icon className={`h-5 w-5 shrink-0 ${isActive ? "text-white" : "group-hover:text-primary transition-colors"}`} />
-                      {isSidebarOpen && <span className="font-semibold text-sm tracking-tight">{item.name}</span>}
-                    </Link>
-                  );
-                })}
-              </div>
+        <nav className="flex-1 px-4 space-y-6 overflow-y-auto scrollbar-none mt-4">
+           <div className="space-y-2">
+            {isSidebarOpen && (
+              <h3 className="px-3 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">
+                Main Menu
+              </h3>
+            )}
+            <div className="space-y-1">
+              {sidebarItems.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center gap-3 p-3 rounded-lg transition-all group ${
+                      isActive 
+                        ? "bg-primary text-white shadow-lg shadow-primary/20 scale-[1.02]" 
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    }`}
+                  >
+                    <item.icon className={`h-5 w-5 shrink-0 ${isActive ? "text-white" : "group-hover:text-primary transition-colors"}`} />
+                    {isSidebarOpen && <span className="font-semibold text-sm tracking-tight">{item.name}</span>}
+                  </Link>
+                );
+              })}
             </div>
-          ))}
+          </div>
         </nav>
 
         <div className="p-4 border-t border-border">
@@ -137,11 +128,11 @@ export default function DashboardLayout({
           
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <p className="text-sm font-semibold">{org.name}</p>
-              <p className="text-xs text-muted-foreground">{org.email}</p>
+              <p className="text-xs font-black text-primary uppercase tracking-widest leading-tight">{user.role}</p>
+              <p className="text-sm font-bold text-foreground leading-tight">{user.name}</p>
             </div>
-            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-              {org.name.charAt(0)}
+            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold border border-primary/20 shadow-inner">
+              {user.name.charAt(0)}
             </div>
           </div>
         </header>

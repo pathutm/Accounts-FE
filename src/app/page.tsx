@@ -27,8 +27,13 @@ export default function LoginPage() {
 
       if (response.ok) {
         localStorage.setItem("token", data.token);
-        localStorage.setItem("org", JSON.stringify(data.org));
-        router.push("/dashboard");
+        localStorage.setItem("user", JSON.stringify(data.user)); // Changed from 'org' to 'user'
+        
+        if (data.user.role === 'vendor') {
+          router.push("/vendor-panel");
+        } else {
+          router.push("/dashboard");
+        }
       } else {
         setError(data.message || "Login failed");
       }
