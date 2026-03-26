@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { 
   Building2, 
   MapPin, 
@@ -176,7 +177,12 @@ export default function CustomersPage() {
                           <Building2 className="h-6 w-6" />
                         </div>
                         <div className="flex flex-col gap-0.5 overflow-hidden">
-                          <span className="font-bold text-foreground text-sm truncate">{customer.Company_Name}</span>
+                          <Link 
+                            href={`/dashboard/customers/${customer.Customer_ID}/invoices`}
+                            className="font-bold text-foreground text-sm truncate hover:text-primary transition-colors hover:underline decoration-primary/30"
+                          >
+                            {customer.Company_Name}
+                          </Link>
                           <div className="flex items-center gap-2">
                             <span className="text-[10px] font-bold px-1.5 py-0.5 bg-muted rounded text-muted-foreground whitespace-nowrap">{customer.Customer_ID}</span>
                             <span className="text-xs text-muted-foreground truncate italic">{customer.Industry}</span>
