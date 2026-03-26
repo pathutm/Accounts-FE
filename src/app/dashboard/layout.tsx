@@ -14,11 +14,19 @@ import {
   X
 } from "lucide-react";
 
-const sidebarItems = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Customer Details", href: "/dashboard/customers", icon: Users },
-  { name: "Invoices", href: "/dashboard/invoices", icon: FileText },
-  { name: "Category Table", href: "/dashboard/categories", icon: List },
+const sidebarSections = [
+  {
+    title: "Accounts Receivable",
+    items: [
+      { name: "Customer Details", href: "/dashboard/customers", icon: Users },
+      { name: "Invoices", href: "/dashboard/invoices", icon: FileText },
+      { name: "Category Table", href: "/dashboard/categories", icon: List },
+    ]
+  },
+  {
+    title: "Accounts Payable",
+    items: [] // Empty for now
+  }
 ];
 
 export default function DashboardLayout({
@@ -73,33 +81,44 @@ export default function DashboardLayout({
           )}
         </div>
 
-        <nav className="flex-1 px-4 space-y-2">
-          {sidebarItems.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
-                  isActive 
-                    ? "bg-primary text-white shadow-md" 
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                }`}
-              >
-                <item.icon className="h-5 w-5 shrink-0" />
-                {isSidebarOpen && <span className="font-medium">{item.name}</span>}
-              </Link>
-            );
-          })}
+        <nav className="flex-1 px-4 space-y-6 overflow-y-auto scrollbar-none">
+          {sidebarSections.map((section) => (
+            <div key={section.title} className="space-y-2">
+              {isSidebarOpen && (
+                <h3 className="px-3 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">
+                  {section.title}
+                </h3>
+              )}
+              <div className="space-y-1">
+                {section.items.map((item) => {
+                  const isActive = pathname === item.href;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`flex items-center gap-3 p-3 rounded-lg transition-all group ${
+                        isActive 
+                          ? "bg-primary text-white shadow-lg shadow-primary/20 scale-[1.02]" 
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      }`}
+                    >
+                      <item.icon className={`h-5 w-5 shrink-0 ${isActive ? "text-white" : "group-hover:text-primary transition-colors"}`} />
+                      {isSidebarOpen && <span className="font-semibold text-sm tracking-tight">{item.name}</span>}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
 
         <div className="p-4 border-t border-border">
           <button
             onClick={handleLogout}
-            className={`w-full flex items-center gap-3 p-3 rounded-lg text-error hover:bg-error/10 transition-colors`}
+            className={`w-full flex items-center gap-3 p-3 rounded-lg text-error hover:bg-error/10 transition-all font-bold group`}
           >
-            <LogOut className="h-5 w-5 shrink-0" />
-            {isSidebarOpen && <span className="font-medium">Logout</span>}
+            <LogOut className="h-5 w-5 shrink-0 group-hover:-translate-x-1 transition-transform" />
+            {isSidebarOpen && <span className="text-sm tracking-tight">Logout</span>}
           </button>
         </div>
       </aside>
