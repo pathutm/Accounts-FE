@@ -11,7 +11,8 @@ import {
   LogOut, 
   TrendingUp,
   Menu,
-  X
+  X,
+  Layers
 } from "lucide-react";
 
 const sidebarSections = [
@@ -21,6 +22,7 @@ const sidebarSections = [
       { name: "Customer Details", href: "/dashboard/customers", icon: Users },
       { name: "Invoices", href: "/dashboard/invoices", icon: FileText },
       { name: "Category Table", href: "/dashboard/categories", icon: List },
+      { name: "Items/Service", href: "/dashboard/items-service", icon: Layers },
     ]
   },
   {
