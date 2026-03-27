@@ -156,11 +156,85 @@ function InvoiceCreateContent() {
 
   const handleSubmit = async () => {
     setLoading(true);
-    setTimeout(() => {
+    try {
+      // Refined DB-Friendly Production Format
+      const payload = {
+        // Root Level Enablers (for IDs & Indexing)
+        vendorId: vendor?._id,
+        organizationId: poData?.organizationId,
+        purchaseOrderId: poId,
+        
+        // Document Metadata
+        invoiceNumber: invoiceNumber,
+        invoiceDate: invoiceDate,
+        createdAt: new Date().toISOString(),
+        status: "SUBMITTED",
+        
+        // Final Billing Identities (Static Snapshots for Audit)
+        billFrom: {
+          name: vendor?.vendor_legal_name || vendor?.name,
+          address: `${vendor?.address?.headquarters || vendor?.address?.mailing}, ${vendor?.address?.city}, ${vendor?.address?.state} - ${vendor?.address?.postal_code}`,
+          gstin: vendor?.tax_info?.gst_vat || vendor?.gst_vat || vendor?.gstin,
+          contact: vendor?.primary_contact?.email || vendor?.email
+        },
+        billTo: {
+          name: orgData?.name,
+          address: orgData?.profile?.address,
+          gstin: orgData?.profile?.tax_id || orgData?.tax_id
+        },
+
+        // Financial Totals (Flattened for Aggregation)
+        subtotal: subtotal,
+        taxTotal: totalTax,
+        cgst: isInterState ? 0 : totalTax / 2,
+        sgst: isInterState ? 0 : totalTax / 2,
+        igst: isInterState ? totalTax : 0,
+        grandTotal: total,
+        currency: "INR",
+
+        // Line Items (Simplified Structure)
+        items: items.map(i => ({
+          description: i.description,
+          quantity: i.quantity,
+          unitPrice: i.unitPrice,
+          discountRate: i.discountRate,
+          taxRate: i.taxRate,
+          taxableValue: i.quantity * i.unitPrice * (1 - i.discountRate / 100),
+          total: i.quantity * i.unitPrice * (1 - i.discountRate / 100) * (1 + i.taxRate / 100)
+        })),
+
+        // Remittance & Legal
+        bankDetails: {
+          accountName: bankDetails.accountName,
+          accountNumber: bankDetails.accountNumber,
+          bankName: bankDetails.bankName,
+          ifsc: bankDetails.ifsc
+        },
+        terms: terms
+      };
+
+      console.log("Dispatching DB-Friendly Invoice Payload:", payload);
+      
+      const res = await fetch(process.env.NEXT_PUBLIC_INVOICE_POST || 'https://api.agents.snsihub.ai/webhook/invoice', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        alert("✅ Industry-Standard Invoice Dispatched Successfully!");
+        router.push("/vendor-panel");
+      } else {
+        alert("❌ Failed to dispatch. Please check connection.");
+      }
+    } catch (err) {
+      console.error("Submission Error:", err);
+      alert("❌ An error occurred during dispatch.");
+    } finally {
       setLoading(false);
-      alert("Invoice Created Successfully!");
-      router.push("/vendor-panel");
-    }, 1500);
+    }
   };
 
   return (

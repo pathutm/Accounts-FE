@@ -27,6 +27,7 @@ const sidebarSections = [
     title: "Accounts Payable",
     items: [
       { name: "Purchase Orders", href: "/dashboard/purchase-orders", icon: FileText },
+      { name: "Invoices", href: "/dashboard/accounts-payable", icon: FileText },
     ]
   }
 ];
