@@ -27,6 +27,7 @@ const sidebarSections = [
     title: "Accounts Payable",
     items: [
       { name: "Purchase Orders", href: "/dashboard/purchase-orders", icon: FileText },
+      { name: "GRN", href: "/dashboard/grn", icon: List },
       { name: "Invoices", href: "/dashboard/accounts-payable", icon: FileText },
     ]
   }
@@ -38,21 +39,21 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [org, setOrg] = useState<any>(null);
+  const [user, setUser] = useState<any>(null);
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    const storedOrg = localStorage.getItem("org");
+    const storedUser = localStorage.getItem("user");
     const token = localStorage.getItem("token");
 
-    if (!storedOrg || storedOrg === "undefined" || !token) {
+    if (!storedUser || storedUser === "undefined" || !token) {
       router.push("/");
     } else {
       try {
-        setOrg(JSON.parse(storedOrg));
+        setUser(JSON.parse(storedUser));
       } catch (e) {
-        console.error("Failed to parse org:", e);
+        console.error("Failed to parse user:", e);
         router.push("/");
       }
     }
@@ -63,7 +64,7 @@ export default function DashboardLayout({
     router.push("/");
   };
 
-  if (!org) return null;
+  if (!user) return null;
 
   return (
     <div className="min-h-screen bg-background flex font-sans">
@@ -77,7 +78,7 @@ export default function DashboardLayout({
           {isSidebarOpen ? (
             <div className="flex items-center gap-3 overflow-hidden">
               <TrendingUp className="h-6 w-6 text-primary shrink-0" />
-              <span className="font-bold text-lg truncate">{org.name}</span>
+              <span className="font-bold text-lg truncate">{user.name}</span>
             </div>
           ) : (
             <TrendingUp className="h-6 w-6 text-primary mx-auto" />
@@ -138,11 +139,11 @@ export default function DashboardLayout({
           
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <p className="text-sm font-semibold">{org.name}</p>
-              <p className="text-xs text-muted-foreground">{org.email}</p>
+              <p className="text-sm font-semibold">{user.name}</p>
+              <p className="text-xs text-muted-foreground">{user.email}</p>
             </div>
             <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-              {org.name.charAt(0)}
+              {user.name.charAt(0)}
             </div>
           </div>
         </header>

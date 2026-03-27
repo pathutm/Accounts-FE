@@ -73,6 +73,8 @@ export default function PurchaseOrders() {
         return 'bg-amber-50 text-amber-700 border-amber-200';
       case 'SENT':
         return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+      case 'RECEIVED':
+        return 'bg-green-50 text-green-700 border-green-200';
       default:
         return 'bg-muted text-muted-foreground border-border';
     }
@@ -193,9 +195,13 @@ export default function PurchaseOrders() {
                       </div>
                     </td>
                     <td className="py-4 pr-4 text-right">
-                      <button className="p-2 hover:bg-muted rounded-full transition-colors text-muted-foreground">
-                        <MoreVertical className="h-4 w-4" />
-                      </button>
+                      <Link 
+                        href={`/dashboard/purchase-orders/${po._id}/grn/create`}
+                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border border-indigo-200"
+                      >
+                        <Plus className="h-3 w-3" />
+                        Create GRN
+                      </Link>
                     </td>
                   </tr>
                 ))}

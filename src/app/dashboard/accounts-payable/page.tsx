@@ -138,7 +138,9 @@ export default function AccountsPayablePage() {
                         <td className="p-5 pl-8">
                            <div className="space-y-1">
                               <p className="text-sm font-black text-foreground uppercase tracking-tight">{inv.invoiceNumber}</p>
-                              <p className="text-[10px] font-bold text-muted-foreground/60 uppercase italic">Based on PO: {inv.invoiceNumber.split('-')[1]}</p>
+                               <p className="text-[10px] font-bold text-muted-foreground/60 uppercase italic">
+                                  Based on PO: {inv.purchaseOrderId?.po_number || inv.invoiceNumber.split('-')[1] || "N/A"}
+                               </p>
                            </div>
                         </td>
                         <td className="p-5">
@@ -173,7 +175,7 @@ export default function AccountsPayablePage() {
                              href={`/dashboard/accounts-payable/${inv._id}`}
                              className="inline-flex items-center gap-2 px-4 py-2 bg-primary/5 hover:bg-primary/10 rounded-lg text-primary text-[10px] font-black uppercase tracking-widest transition-all border border-primary/10"
                            >
-                              Review Task
+                              Review
                               <ArrowUpRight className="h-3.5 w-3.5" />
                            </Link>
                         </td>

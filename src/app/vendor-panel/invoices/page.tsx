@@ -140,8 +140,11 @@ export default function VendorInvoicesPage() {
                              <p className="text-sm font-black text-foreground uppercase tracking-tight">{inv.invoiceNumber}</p>
                              <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground/60 uppercase">
                                 <Building2 className="h-3 w-3" />
-                                <span>{inv.billTo.name}</span>
-                             </div>
+                                 <span>{inv.billTo.name}</span>
+                              </div>
+                              <p className="text-[9px] font-black text-primary/40 uppercase italic pl-5">
+                                 Based on PO: {inv.purchaseOrderId?.po_number || inv.invoiceNumber.split('-')[1] || "N/A"}
+                              </p>
                           </div>
                        </div>
 

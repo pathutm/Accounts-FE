@@ -148,6 +148,11 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
               <div className="space-y-1">
                  <label className="text-[10px] font-black uppercase text-muted-foreground/50 tracking-[0.2em]">Document Number</label>
                  <p className="text-lg font-black text-foreground uppercase tracking-tight">{invoice.invoiceNumber}</p>
+                  {invoice.purchaseOrderId?.po_number && (
+                    <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] bg-primary/5 px-3 py-1 rounded-full inline-block border border-primary/10 italic mt-2">
+                       Based on PO: {invoice.purchaseOrderId.po_number}
+                    </p>
+                  )}
               </div>
               <div className="space-y-1 pt-2 border-t border-border/50 w-32">
                  <div className="flex items-center justify-end gap-2">

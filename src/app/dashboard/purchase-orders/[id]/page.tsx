@@ -1,17 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { 
-  FileText, 
-  Building2, 
-  Calendar, 
-  Truck, 
+import {
+  Plus,
+  FileText,
+  Building2,
+  Calendar,
+  Truck,
   IndianRupee,
   ChevronLeft,
   ChevronRight,
   Briefcase,
   Download,
-  Printer
+  Printer,
+  Package
 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -31,6 +33,7 @@ interface PurchaseOrder {
   items: POItem[];
   grand_total: number;
   notes: string;
+  status: string;
   vendorId: {
     vendor_legal_name: string;
     product_info: {
@@ -57,11 +60,11 @@ export default function PODetails() {
   const { id } = useParams();
   const [po, setPo] = useState<PurchaseOrder | null>(null);
   const [loading, setLoading] = useState(true);
-  const [org, setOrg] = useState<any>(null);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    const storedOrg = localStorage.getItem("org");
-    if (storedOrg) setOrg(JSON.parse(storedOrg));
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) setUser(JSON.parse(storedUser));
     fetchPODetails();
   }, [id]);
 
@@ -79,6 +82,23 @@ export default function PODetails() {
       console.error("Failed to fetch PO details:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getStatusStyles = (status: string) => {
+    switch (status) {
+      case 'APPROVED':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      case 'REJECTED':
+        return 'bg-red-50 text-red-700 border-red-200';
+      case 'PENDING_APPROVAL':
+        return 'bg-amber-50 text-amber-700 border-amber-200';
+      case 'SENT':
+        return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+      case 'RECEIVED':
+        return 'bg-green-50 text-green-700 border-green-200';
+      default:
+        return 'bg-muted text-muted-foreground border-border';
     }
   };
 
@@ -105,18 +125,37 @@ export default function PODetails() {
             <ChevronLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
             Back to Orders
           </Link>
-          <h1 className="text-3xl font-black tracking-tight text-foreground flex items-center gap-3">
+          <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shadow-inner border border-primary/20">
               <FileText className="h-6 w-6" />
             </div>
-            {po.po_number}
-          </h1>
+            <div>
+              <h1 className="text-3xl font-black tracking-tight text-foreground">{po.po_number}</h1>
+              <div className={`mt-1 inline-flex items-center px-2 py-0.5 rounded-full border text-[9px] font-black uppercase tracking-widest ${getStatusStyles(po.status)}`}>
+                {po.status?.replace('_', ' ')}
+              </div>
+            </div>
+          </div>
         </div>
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg text-xs font-bold transition-all border border-border/50">
-            <Printer className="h-3.5 w-3.5" />
-            Print
-          </button>
+          {po.status !== 'RECEIVED' && (
+            <Link
+              href={`/dashboard/purchase-orders/${po._id}/grn/create`}
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white hover:opacity-90 rounded-lg text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-indigo-600/20"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Create GRN
+            </Link>
+          )}
+          {po.status === 'RECEIVED' && (
+            <Link
+              href="/dashboard/grn"
+              className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg text-xs font-black uppercase tracking-widest hover:bg-green-100 transition-all"
+            >
+              <Package className="h-3.5 w-3.5" />
+              View GRN
+            </Link>
+          )}
           <button className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-xs font-bold hover:opacity-90 transition-all shadow-lg hover:shadow-primary/25">
             <Download className="h-3.5 w-3.5" />
             Export PDF
@@ -132,7 +171,7 @@ export default function PODetails() {
             <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none">
               <Briefcase className="h-40 w-40" />
             </div>
-            
+
             <div className="flex items-center gap-2 pb-6 border-b border-border/50 relative z-10 mb-6">
               <FileText className="h-5 w-5 text-primary" />
               <h2 className="font-black uppercase tracking-tight text-sm">Line Items</h2>
@@ -190,7 +229,7 @@ export default function PODetails() {
               <Building2 className="h-4 w-4 text-primary" />
               <h2 className="font-black uppercase tracking-tight text-xs">Vendor Details</h2>
             </div>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Legal Name</label>
@@ -218,7 +257,7 @@ export default function PODetails() {
               <Truck className="h-4 w-4 text-primary" />
               <h2 className="font-black uppercase tracking-tight text-xs">Order Schedule</h2>
             </div>
-            
+
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -239,9 +278,9 @@ export default function PODetails() {
 
           {/* Org Info (Footer of sidebar) */}
           <div className="p-4 border border-dashed border-border rounded-xl">
-             <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-2 block">Bill To</label>
-             <p className="text-xs font-bold">{org?.name}</p>
-             <p className="text-[10px] text-muted-foreground font-medium">{org?.email}</p>
+            <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-2 block">Bill To</label>
+            <p className="text-xs font-bold">{user?.name}</p>
+            <p className="text-[10px] text-muted-foreground font-medium">{user?.email}</p>
           </div>
         </div>
       </div>
